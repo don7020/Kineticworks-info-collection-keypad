@@ -3,18 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>정보 입력</title>
+<title>키네틱웍스 정보 입력</title>
 <style>
-  /* ============================================
-     디자인은 여기 CSS만 나중에 통째로 교체하면 됩니다.
-     구조(HTML)는 그대로 두고 색/폰트/레이아웃만 바꿔도 동작합니다.
-     ============================================ */
   :root {
     --color-bg: #f5f5f3;
     --color-surface: #ffffff;
     --color-text: #1a1a1a;
     --color-muted: #8a8a86;
-    --color-accent: #1a1a1a;
+    --color-accent: #111111;
     --color-border: #dddddb;
     --color-error: #c0392b;
     --radius: 12px;
@@ -44,24 +40,40 @@
     max-width: 480px;
     background: var(--color-surface);
     border-radius: var(--radius);
-    padding: 32px 28px 28px;
+    padding: 28px 28px 28px;
     box-shadow: 0 2px 24px rgba(0,0,0,0.06);
   }
 
+  .logo-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .logo-wrap img {
+    height: 56px;
+    width: auto;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: default;
+  }
+
   .card h1 {
-    font-size: 22px;
+    font-size: 20px;
     margin: 0 0 6px;
+    text-align: center;
   }
 
   .card .desc {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--color-muted);
-    margin: 0 0 28px;
+    margin: 0 0 26px;
     line-height: 1.5;
+    text-align: center;
   }
 
   .field {
-    margin-bottom: 22px;
+    margin-bottom: 20px;
   }
 
   .field label {
@@ -93,6 +105,46 @@
     outline: none;
     border-color: var(--color-accent);
     background: #fff;
+  }
+
+  .prefix-group {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #fafafa;
+    overflow: hidden;
+  }
+
+  .prefix-group:focus-within {
+    border-color: var(--color-accent);
+    background: #fff;
+  }
+
+  .prefix-group .prefix {
+    display: flex;
+    align-items: center;
+    padding: 0 6px 0 14px;
+    font-size: 16px;
+    color: var(--color-muted);
+    font-weight: 600;
+    white-space: nowrap;
+    background: #f0f0ee;
+    border-right: 1px solid var(--color-border);
+  }
+
+  .prefix-group input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    padding: 14px 14px 14px 8px;
+    font-size: 16px;
+    color: var(--color-text);
+  }
+
+  .prefix-group input:focus {
+    outline: none;
   }
 
   .choice-group {
@@ -130,7 +182,8 @@
     margin-top: 6px;
   }
 
-  .field.invalid input {
+  .field.invalid input,
+  .field.invalid .prefix-group {
     border-color: var(--color-error);
   }
 
@@ -156,6 +209,19 @@
     cursor: default;
   }
 
+  .secondary-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
   .privacy-note {
     font-size: 11px;
     color: var(--color-muted);
@@ -164,7 +230,6 @@
     text-align: center;
   }
 
-  /* 완료 화면 */
   .done-icon {
     width: 56px;
     height: 56px;
@@ -178,7 +243,7 @@
     margin: 0 auto 20px;
   }
 
-  .card.done { text-align: center; }
+  .card.done, .card.duplicate { text-align: center; }
 
   .again-btn {
     margin-top: 20px;
@@ -191,6 +256,61 @@
   }
 
   .hidden { display: none !important; }
+
+  /* 관리자 모드 */
+  .admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .admin-header h1 {
+    margin: 0;
+    text-align: left;
+  }
+
+  .admin-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--color-muted);
+    cursor: pointer;
+    padding: 4px 8px;
+  }
+
+  .admin-search-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .admin-search-row input {
+    flex: 1;
+    padding: 12px 14px;
+    font-size: 15px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: #fafafa;
+  }
+
+  .admin-search-row button {
+    padding: 0 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .admin-status {
+    font-size: 13px;
+    color: var(--color-muted);
+    margin-bottom: 14px;
+  }
+
+  .admin-status.notfound { color: var(--color-error); }
 </style>
 </head>
 <body>
@@ -199,6 +319,9 @@
 
   <!-- 입력 화면 -->
   <form class="card" id="formCard" novalidate>
+    <div class="logo-wrap">
+      <img id="logoImg" src="kineticworks-logo.png" alt="Kineticworks">
+    </div>
     <h1>정보를 입력해주세요</h1>
     <p class="desc">아래 항목을 입력하고 제출 버튼을 눌러주세요.</p>
 
@@ -209,9 +332,12 @@
     </div>
 
     <div class="field" id="field-phone">
-      <label for="phone">전화번호</label>
-      <input type="tel" id="phone" name="phone" autocomplete="tel" placeholder="010-1234-5678" inputmode="numeric">
-      <div class="error-msg">올바른 전화번호 형식으로 입력해주세요. (예: 010-1234-5678)</div>
+      <label for="phoneRest">전화번호</label>
+      <div class="prefix-group">
+        <span class="prefix">010-</span>
+        <input type="tel" id="phoneRest" inputmode="numeric" maxlength="8" placeholder="12345678">
+      </div>
+      <div class="error-msg">010- 뒤 8자리 숫자를 입력해주세요. (예: 12345678)</div>
     </div>
 
     <div class="field" id="field-gender">
@@ -237,43 +363,119 @@
     </div>
 
     <div class="field" id="field-instagram">
-      <label for="instagram">인스타그램 아이디 <span class="optional">(선택)</span></label>
-      <input type="text" id="instagram" name="instagram" autocomplete="off" placeholder="@theresoutdoor">
+      <label for="instagramHandle">인스타그램 아이디 <span class="optional">(선택)</span></label>
+      <div class="prefix-group">
+        <span class="prefix">@</span>
+        <input type="text" id="instagramHandle" autocomplete="off" placeholder="theresoutdoor">
+      </div>
+    </div>
+
+    <div class="field" id="field-consent">
+      <label style="display:flex; align-items:flex-start; gap:8px; font-weight:400; cursor:pointer;">
+        <input type="checkbox" id="consent" style="margin-top:3px; width:16px; height:16px; flex-shrink:0;">
+        <span>
+          [필수] 개인정보 수집·이용에 동의합니다.
+          <span style="display:block; color: var(--color-muted); font-size:12px; margin-top:2px;">
+            수집 항목: 이름, 전화번호, 성별, 연령대, 인스타그램(선택) · 이벤트 운영 목적으로만 사용, 목적 달성 후 파기
+          </span>
+        </span>
+      </label>
+      <div class="error-msg">개인정보 수집·이용에 동의해주셔야 제출할 수 있습니다.</div>
     </div>
 
     <button type="submit" class="submit-btn" id="submitBtn">제출하기</button>
-
-    <p class="privacy-note">
-      입력하신 정보는 데얼스 이벤트 운영 목적으로만 사용되며,<br>
-      목적 달성 후 안전하게 폐기됩니다.
-    </p>
   </form>
 
   <!-- 완료 화면 -->
   <div class="card done hidden" id="doneCard">
     <div class="done-icon">✓</div>
-    <h1>제출 완료</h1>
-    <p class="desc">감사합니다. 정보가 정상적으로 접수되었습니다.</p>
+    <h1>키네틱웍스를 방문해주셔서 감사합니다</h1>
     <button class="again-btn" id="againBtn">다음 분 입력하기</button>
+  </div>
+
+  <!-- 중복 등록 화면 -->
+  <div class="card duplicate hidden" id="duplicateCard">
+    <div class="done-icon" style="background: var(--color-error);">!</div>
+    <h1>이미 등록된 사용자입니다</h1>
+    <p class="desc">입력하신 전화번호로 이미 접수된 내역이 있습니다.</p>
+    <button class="again-btn" id="duplicateAgainBtn">다시 입력하기</button>
+  </div>
+
+  <!-- 관리자 모드 -->
+  <div class="card hidden" id="adminCard">
+    <div class="admin-header">
+      <h1>관리자 모드</h1>
+      <button type="button" class="admin-close" id="adminCloseBtn">✕</button>
+    </div>
+    <p class="desc" style="text-align:left; margin-bottom:16px;">전화번호로 등록 건을 조회해서 잘못 입력된 정보를 수정할 수 있습니다.</p>
+
+    <div class="admin-search-row">
+      <input type="text" id="adminSearchPhone" placeholder="010-1234-5678" inputmode="numeric">
+      <button type="button" id="adminSearchBtn">조회</button>
+    </div>
+    <div class="admin-status hidden" id="adminStatus"></div>
+
+    <form id="adminEditForm" class="hidden" novalidate>
+      <div class="field" id="admin-field-name">
+        <label for="adminName">이름</label>
+        <input type="text" id="adminName">
+      </div>
+      <div class="field" id="admin-field-phone">
+        <label for="adminPhone">전화번호</label>
+        <input type="text" id="adminPhone" inputmode="numeric" placeholder="010-1234-5678">
+      </div>
+      <div class="field" id="admin-field-gender">
+        <label>성별</label>
+        <div class="choice-group gender" data-field="adminGender">
+          <div class="choice-btn" data-value="여성">여성</div>
+          <div class="choice-btn" data-value="남성">남성</div>
+          <div class="choice-btn" data-value="선택 안함">선택 안함</div>
+        </div>
+      </div>
+      <div class="field" id="admin-field-age">
+        <label>연령대</label>
+        <div class="choice-group" data-field="adminAgeGroup">
+          <div class="choice-btn" data-value="10대">10대</div>
+          <div class="choice-btn" data-value="20대">20대</div>
+          <div class="choice-btn" data-value="30대">30대</div>
+          <div class="choice-btn" data-value="40대">40대</div>
+          <div class="choice-btn" data-value="50대+">50대+</div>
+        </div>
+      </div>
+      <div class="field" id="admin-field-instagram">
+        <label for="adminInstagram">인스타그램 아이디</label>
+        <input type="text" id="adminInstagram" placeholder="@theresoutdoor">
+      </div>
+
+      <button type="submit" class="submit-btn" id="adminSaveBtn">수정 저장</button>
+    </form>
   </div>
 
 </div>
 
 <script>
-  // ============================================
-  // 여기에 배포한 Apps Script 웹앱 URL을 붙여넣으세요.
-  // (배포 방법은 README.md 참고)
-  // ============================================
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzBbhF2mEiwOjG4Y51HcXTFjVdkqDXK9-MRlsrb-1nNiW5o0U6_1yBadeFMvPTUy3VQ/exec";
+  // 이 패드가 어느 이벤트/부스에서 쓰이는지 표시할 값 (시트의 "수집소스" 컬럼에 기록됨)
+  const SOURCE_LABEL = "키네틱웍스 부스";
+
+  // 배포한 Cloudflare Worker 주소
+  const WORKER_URL = "https://kineticworks-info-collector.don-86a.workers.dev";
 
   const form = document.getElementById('formCard');
   const doneCard = document.getElementById('doneCard');
+  const duplicateCard = document.getElementById('duplicateCard');
+  const adminCard = document.getElementById('adminCard');
   const submitBtn = document.getElementById('submitBtn');
 
   const state = { gender: null, ageGroup: null };
+  const adminState = { gender: null, ageGroup: null, rowNumber: null };
 
-  // 선택형 버튼 (성별 / 연령대) 클릭 처리
-  document.querySelectorAll('.choice-group').forEach(group => {
+  function showOnly(card) {
+    [form, doneCard, duplicateCard, adminCard].forEach(c => c.classList.add('hidden'));
+    card.classList.remove('hidden');
+  }
+
+  // ---------- 선택형 버튼 (일반 폼: 성별 / 연령대) ----------
+  document.querySelectorAll('#formCard .choice-group').forEach(group => {
     const fieldName = group.dataset.field;
     group.querySelectorAll('.choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -285,33 +487,33 @@
     });
   });
 
-  function clearError(fieldEl) {
-    fieldEl.classList.remove('invalid');
+  document.getElementById('consent').addEventListener('change', function () {
+    if (this.checked) clearError(document.getElementById('field-consent'));
+  });
+
+  function clearError(fieldEl) { fieldEl.classList.remove('invalid'); }
+  function setError(fieldEl) { fieldEl.classList.add('invalid'); }
+
+  function isValidPhoneDigits(digits) {
+    return /^\d{8}$/.test(digits);
   }
 
-  function setError(fieldEl) {
-    fieldEl.classList.add('invalid');
+  function buildPhone(restDigits) {
+    return `010-${restDigits.slice(0, 4)}-${restDigits.slice(4, 8)}`;
   }
 
-  function isValidPhone(value) {
-    // 010-1234-5678 / 01012345678 / 010 1234 5678 등 허용
-    const digits = value.replace(/[^0-9]/g, '');
-    return /^01[016789]\d{7,8}$/.test(digits);
-  }
-
-  function formatPhone(value) {
-    const digits = value.replace(/[^0-9]/g, '');
-    if (digits.length === 11) return digits.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
-    if (digits.length === 10) return digits.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
-    return value;
-  }
+  // 숫자만 입력되도록 제한
+  document.getElementById('phoneRest').addEventListener('input', function () {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
     const nameEl = document.getElementById('name');
-    const phoneEl = document.getElementById('phone');
-    const instagramEl = document.getElementById('instagram');
+    const phoneRestEl = document.getElementById('phoneRest');
+    const instagramEl = document.getElementById('instagramHandle');
+    const consentEl = document.getElementById('consent');
 
     let valid = true;
 
@@ -322,7 +524,8 @@
       clearError(document.getElementById('field-name'));
     }
 
-    if (!isValidPhone(phoneEl.value)) {
+    const phoneDigits = phoneRestEl.value.trim();
+    if (!isValidPhoneDigits(phoneDigits)) {
       setError(document.getElementById('field-phone'));
       valid = false;
     } else {
@@ -343,54 +546,205 @@
       clearError(document.getElementById('field-age'));
     }
 
+    if (!consentEl.checked) {
+      setError(document.getElementById('field-consent'));
+      valid = false;
+    } else {
+      clearError(document.getElementById('field-consent'));
+    }
+
     if (!valid) return;
 
+    const instagramHandle = instagramEl.value.trim().replace(/^@/, '');
+
     const payload = {
+      action: 'submit',
       name: nameEl.value.trim(),
-      phone: formatPhone(phoneEl.value.trim()),
+      phone: buildPhone(phoneDigits),
       gender: state.gender,
       ageGroup: state.ageGroup,
-      instagram: instagramEl.value.trim()
+      instagram: instagramHandle ? `@${instagramHandle}` : '',
+      consent: consentEl.checked,
+      source: SOURCE_LABEL
     };
 
     submitBtn.disabled = true;
     submitBtn.textContent = '제출 중...';
 
-    // Apps Script 웹앱으로 전송
-    // mode: 'no-cors' 로 보내면 구글 쪽 CORS 제한 없이 전송 가능하지만
-    // 응답 내용은 읽을 수 없습니다 (전송 성공 여부만 낙관적으로 처리).
-    fetch(APPS_SCRIPT_URL, {
+    fetch(WORKER_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-    .then(() => {
-      showDone();
+    .then(async (res) => {
+      const result = await res.json().catch(() => null);
+      if (res.ok && result && result.result === 'success') {
+        showOnly(doneCard);
+      } else if (result && result.result === 'duplicate') {
+        showOnly(duplicateCard);
+      } else {
+        const msg = (result && result.message) ? result.message : '알 수 없는 오류';
+        alert('제출에 실패했습니다: ' + msg);
+      }
     })
     .catch(() => {
-      // 네트워크 자체가 끊긴 경우가 아니면 보통 여기로 안 옵니다 (no-cors 특성상).
-      alert('전송 중 문제가 발생했습니다. 다시 시도해주세요.');
+      alert('네트워크 오류로 전송하지 못했습니다. 연결 상태를 확인 후 다시 시도해주세요.');
+    })
+    .finally(() => {
       submitBtn.disabled = false;
       submitBtn.textContent = '제출하기';
     });
   });
 
-  function showDone() {
-    form.classList.add('hidden');
-    doneCard.classList.remove('hidden');
-  }
-
-  document.getElementById('againBtn').addEventListener('click', () => {
+  function resetForm() {
     form.reset();
     state.gender = null;
     state.ageGroup = null;
-    document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
-    document.querySelectorAll('.field').forEach(f => f.classList.remove('invalid'));
-    submitBtn.disabled = false;
-    submitBtn.textContent = '제출하기';
-    doneCard.classList.add('hidden');
-    form.classList.remove('hidden');
+    document.querySelectorAll('#formCard .choice-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('#formCard .field').forEach(f => f.classList.remove('invalid'));
+  }
+
+  document.getElementById('againBtn').addEventListener('click', () => {
+    resetForm();
+    showOnly(form);
+  });
+
+  document.getElementById('duplicateAgainBtn').addEventListener('click', () => {
+    resetForm();
+    showOnly(form);
+  });
+
+  // ---------- 로고 4연속 클릭 → 관리자 모드 ----------
+  let tapCount = 0;
+  let tapTimer = null;
+
+  document.getElementById('logoImg').addEventListener('click', () => {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
+
+    if (tapCount >= 4) {
+      tapCount = 0;
+      clearTimeout(tapTimer);
+      openAdminMode();
+    }
+  });
+
+  function openAdminMode() {
+    document.getElementById('adminSearchPhone').value = '';
+    document.getElementById('adminStatus').classList.add('hidden');
+    document.getElementById('adminEditForm').classList.add('hidden');
+    showOnly(adminCard);
+  }
+
+  document.getElementById('adminCloseBtn').addEventListener('click', () => {
+    showOnly(form);
+  });
+
+  // ---------- 관리자: 선택형 버튼 ----------
+  document.querySelectorAll('#adminEditForm .choice-group').forEach(group => {
+    const fieldName = group.dataset.field; // adminGender / adminAgeGroup
+    group.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        group.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        adminState[fieldName === 'adminGender' ? 'gender' : 'ageGroup'] = btn.dataset.value;
+      });
+    });
+  });
+
+  function selectAdminChoice(fieldName, value) {
+    const group = document.querySelector(`#adminEditForm .choice-group[data-field="${fieldName}"]`);
+    group.querySelectorAll('.choice-btn').forEach(b => {
+      b.classList.toggle('selected', b.dataset.value === value);
+    });
+  }
+
+  // ---------- 관리자: 조회 ----------
+  document.getElementById('adminSearchBtn').addEventListener('click', () => {
+    const phoneInput = document.getElementById('adminSearchPhone').value.trim();
+    const digits = phoneInput.replace(/[^0-9]/g, '');
+    if (digits.length < 9) {
+      showAdminStatus('전화번호를 정확히 입력해주세요.', true);
+      return;
+    }
+
+    showAdminStatus('조회 중...', false);
+    document.getElementById('adminEditForm').classList.add('hidden');
+
+    fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'lookup', phone: phoneInput })
+    })
+    .then(async (res) => {
+      const result = await res.json().catch(() => null);
+      if (result && result.result === 'found') {
+        adminState.rowNumber = result.rowNumber;
+        adminState.gender = result.data.gender;
+        adminState.ageGroup = result.data.ageGroup;
+
+        document.getElementById('adminName').value = result.data.name || '';
+        document.getElementById('adminPhone').value = result.data.phone || '';
+        document.getElementById('adminInstagram').value = result.data.instagram || '';
+        selectAdminChoice('adminGender', result.data.gender);
+        selectAdminChoice('adminAgeGroup', result.data.ageGroup);
+
+        document.getElementById('adminEditForm').classList.remove('hidden');
+        showAdminStatus('등록된 정보를 찾았습니다. 아래에서 수정 후 저장하세요.', false);
+      } else if (result && result.result === 'not_found') {
+        showAdminStatus('등록된 정보가 없습니다.', true);
+      } else {
+        showAdminStatus((result && result.message) || '조회에 실패했습니다.', true);
+      }
+    })
+    .catch(() => showAdminStatus('네트워크 오류가 발생했습니다.', true));
+  });
+
+  function showAdminStatus(message, isError) {
+    const el = document.getElementById('adminStatus');
+    el.textContent = message;
+    el.classList.remove('hidden');
+    el.classList.toggle('notfound', !!isError);
+  }
+
+  // ---------- 관리자: 수정 저장 ----------
+  document.getElementById('adminEditForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const saveBtn = document.getElementById('adminSaveBtn');
+    const payload = {
+      action: 'update',
+      rowNumber: adminState.rowNumber,
+      name: document.getElementById('adminName').value.trim(),
+      phone: document.getElementById('adminPhone').value.trim(),
+      gender: adminState.gender,
+      ageGroup: adminState.ageGroup,
+      instagram: document.getElementById('adminInstagram').value.trim(),
+      source: SOURCE_LABEL
+    };
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = '저장 중...';
+
+    fetch(WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(async (res) => {
+      const result = await res.json().catch(() => null);
+      if (res.ok && result && result.result === 'success') {
+        showAdminStatus('수정 내용이 저장되었습니다.', false);
+      } else {
+        showAdminStatus((result && result.message) || '저장에 실패했습니다.', true);
+      }
+    })
+    .catch(() => showAdminStatus('네트워크 오류가 발생했습니다.', true))
+    .finally(() => {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '수정 저장';
+    });
   });
 </script>
 

@@ -322,7 +322,7 @@
 
     <div class="field">
       <label for="phone">전화번호</label>
-      <input type="tel" id="phone" name="phone" placeholder="010-1234-5678" inputmode="numeric" autocomplete="off">
+      <input type="tel" id="phone" name="phone" value="010-" placeholder="1234-5678" inputmode="numeric" autocomplete="off">
     </div>
 
     <div class="field">
@@ -395,8 +395,19 @@
      설정 영역 — 배포 전 반드시 확인
      ========================================================= */
   var CONFIG = {
-    // Apps Script 배포 후 나오는 웹 앱 URL로 교체하세요.
-    WEB_APP_URL: 'https://script.google.com/a/macros/theres.co/s/AKfycbyXjQ3KPHkwm0hQX5ndDSpxwdQhoO6KErQqhIRovHGfu0VvewELUXzXE5jVHzosfcmO/exec',
+    // 구글 폼 제출(formResponse) 엔드포인트 — 손님에게는 절대 노출되지 않고 뒤에서만 쓰임
+    FORM_SUBMIT_URL: 'https://docs.google.com/forms/d/e/1FAIpQLSeK0IDCQXVA-29ELmDneBnSMnvWGD6KVfh5q0HruE0srhMCEA/formResponse',
+
+    // 구글 폼 각 문항의 entry ID (Apps Script 실행 로그에서 가져온 값)
+    ENTRY_IDS: {
+      name: 'entry.841388146',
+      phone: 'entry.1004465133',
+      gender: 'entry.1269078686',
+      ageGroup: 'entry.1781291176',
+      instagram: 'entry.2042496845',
+      consent: 'entry.843758883',
+      source: 'entry.299987983'
+    },
 
     // 여러 행사/부스에서 같은 패드를 쓸 경우 구분용 라벨 (시트의 '수집소스' 컬럼에 기록됨)
     SOURCE_LABEL: '',
@@ -435,16 +446,31 @@
     });
   });
 
-  /* ---- 전화번호 자동 하이픈 ---- */
-  phoneInput.addEventListener('input', function () {
-    var digits = phoneInput.value.replace(/\D/g, '').slice(0, 11);
-    var formatted = digits;
-    if (digits.length > 3 && digits.length <= 7) {
-      formatted = digits.slice(0, 3) + '-' + digits.slice(3);
-    } else if (digits.length > 7) {
-      formatted = digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+  /* ---- 전화번호: "010-" 접두사는 항상 유지, 나머지 숫자만 자동 하이픈 처리 ---- */
+  function formatPhone(raw) {
+    var digits = raw.replace(/\D/g, '');
+    var rest = (digits.slice(0, 3) === '010') ? digits.slice(3) : digits;
+    rest = rest.slice(0, 8); // 010 뒤 최대 8자리 (4자리-4자리)
+
+    var formatted = '010-';
+    if (rest.length > 4) {
+      formatted += rest.slice(0, 4) + '-' + rest.slice(4);
+    } else {
+      formatted += rest;
     }
-    phoneInput.value = formatted;
+    return formatted;
+  }
+
+  phoneInput.addEventListener('input', function () {
+    phoneInput.value = formatPhone(phoneInput.value);
+  });
+
+  // 포커스가 갈 때 커서를 항상 맨 뒤(나머지 번호 입력 위치)로 이동
+  phoneInput.addEventListener('focus', function () {
+    var v = phoneInput.value;
+    setTimeout(function () {
+      phoneInput.setSelectionRange(v.length, v.length);
+    }, 0);
   });
 
   function isValidPhone(value) {
@@ -499,17 +525,30 @@
   }
 
   function sendPayload(payload) {
-    if (!CONFIG.WEB_APP_URL || CONFIG.WEB_APP_URL.indexOf('REPLACE_WITH') === 0) {
-      return Promise.reject(new Error('WEB_APP_URL이 설정되지 않았습니다.'));
+    if (!CONFIG.FORM_SUBMIT_URL) {
+      return Promise.reject(new Error('FORM_SUBMIT_URL이 설정되지 않았습니다.'));
     }
-    return fetch(CONFIG.WEB_APP_URL, {
+
+    var params = new URLSearchParams();
+    params.append(CONFIG.ENTRY_IDS.name, payload.name);
+    params.append(CONFIG.ENTRY_IDS.phone, payload.phone);
+    params.append(CONFIG.ENTRY_IDS.gender, payload.gender);
+    params.append(CONFIG.ENTRY_IDS.ageGroup, payload.ageGroup);
+    params.append(CONFIG.ENTRY_IDS.instagram, payload.instagram || '');
+    params.append(CONFIG.ENTRY_IDS.consent, payload.consent ? 'Y' : 'N');
+    params.append(CONFIG.ENTRY_IDS.source, payload.source || '');
+
+    // 구글 폼의 formResponse는 CORS 응답 헤더를 안 줘서 no-cors로 보낸다.
+    // 응답 내용은 읽을 수 없지만(오파크 응답), 요청 자체가 정상적으로 나가면
+    // 구글 쪽 시트에는 그대로 기록된다. 완전히 오프라인이거나 주소 자체가
+    // 잘못된 경우에만 fetch가 reject되어 대기열(catch)로 넘어간다.
+    return fetch(CONFIG.FORM_SUBMIT_URL, {
       method: 'POST',
-      // text/plain 으로 보내야 브라우저가 프리플라이트(OPTIONS) 요청을 만들지 않음
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    }).then(function (res) {
-      if (!res.ok) throw new Error('서버 응답 오류');
-      return res.json();
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body: params.toString()
+    }).then(function () {
+      return true;
     });
   }
 

@@ -1,0 +1,25 @@
+{
+  "name": "키네틱웍스 정보 수집 키패드",
+  "short_name": "키네틱웍스",
+  "description": "키네틱웍스 부스 방문객 정보 수집 패드",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f5f5f3",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

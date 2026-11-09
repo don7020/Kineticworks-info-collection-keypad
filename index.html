@@ -352,6 +352,45 @@
   }
 
   .admin-status.notfound { color: var(--color-error); }
+
+  /* 동의 체크박스 / 관심 브랜드 */
+  .field.compact { margin-bottom: 14px; }
+
+  .field label.consent-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 0;
+    font-weight: 400;
+    cursor: pointer;
+  }
+
+  .consent-row input[type="checkbox"] {
+    margin: 3px 0 0;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .consent-row .consent-title {
+    font-size: clamp(14px, 1.6vw, 16px);
+    line-height: 1.5;
+  }
+
+  .consent-row .consent-note {
+    display: block;
+    color: var(--color-muted);
+    font-size: 12px;
+    margin-top: 3px;
+    line-height: 1.5;
+  }
+
+  .field label .hint {
+    font-weight: 400;
+    color: var(--color-muted);
+    font-size: 0.75em;
+    margin-left: 4px;
+  }
 </style>
 </head>
 <body>
@@ -383,7 +422,7 @@
 
     <div class="field" id="field-gender">
       <label>성별</label>
-      <div class="choice-group gender" data-field="gender">
+      <div class="choice-group gender" id="genderGroup">
         <div class="choice-btn" data-value="여성">여성</div>
         <div class="choice-btn" data-value="남성">남성</div>
         <div class="choice-btn" data-value="선택 안함">선택 안함</div>
@@ -393,7 +432,7 @@
 
     <div class="field" id="field-age">
       <label>연령대</label>
-      <div class="choice-group" data-field="ageGroup">
+      <div class="choice-group" id="ageGroup">
         <div class="choice-btn" data-value="10대">10대</div>
         <div class="choice-btn" data-value="20대">20대</div>
         <div class="choice-btn" data-value="30대">30대</div>
@@ -403,25 +442,34 @@
       <div class="error-msg">연령대를 선택해주세요.</div>
     </div>
 
-    <div class="field" id="field-instagram">
-      <label for="instagramHandle">인스타그램 아이디 <span class="optional">(선택)</span></label>
-      <div class="prefix-group">
-        <span class="prefix">@</span>
-        <input type="text" id="instagramHandle" autocomplete="off" placeholder="theresoutdoor">
+    <div class="field" id="field-brand">
+      <label>관심 브랜드 <span class="hint">(복수 선택 가능)</span></label>
+      <div class="choice-group" id="brandGroup" data-multi="true">
+        <div class="choice-btn" data-value="CDC">CDC</div>
+        <div class="choice-btn" data-value="릿지">릿지</div>
       </div>
+      <div class="error-msg">관심 브랜드를 하나 이상 선택해주세요.</div>
     </div>
 
-    <div class="field" id="field-consent">
-      <label style="display:flex; align-items:flex-start; gap:8px; font-weight:400; cursor:pointer;">
-        <input type="checkbox" id="consent" style="margin-top:3px; width:16px; height:16px; flex-shrink:0;">
-        <span>
+    <div class="field compact" id="field-privacy">
+      <label class="consent-row">
+        <input type="checkbox" id="privacyConsent">
+        <span class="consent-title">
           [필수] 개인정보 수집·이용에 동의합니다.
-          <span style="display:block; color: var(--color-muted); font-size:12px; margin-top:2px;">
-            수집 항목: 이름, 전화번호, 성별, 연령대, 인스타그램(선택) · 이벤트 운영 목적으로만 사용, 목적 달성 후 파기
-          </span>
+          <span class="consent-note">수집 항목: 이름, 전화번호, 성별, 연령대, 관심 브랜드 · 이용 목적: 키네틱웍스 고객 응대 및 소식 안내</span>
         </span>
       </label>
       <div class="error-msg">개인정보 수집·이용에 동의해주셔야 제출할 수 있습니다.</div>
+    </div>
+
+    <div class="field" id="field-marketing">
+      <label class="consent-row">
+        <input type="checkbox" id="marketingConsent">
+        <span class="consent-title">
+          [선택] 키네틱웍스의 신제품·할인 등 마케팅 정보를 문자 메시지로 받는 것에 동의합니다.
+          <span class="consent-note">동의하지 않아도 이용에 제한이 없으며, 언제든 수신을 거부할 수 있습니다.</span>
+        </span>
+      </label>
     </div>
 
     <button type="submit" class="submit-btn" id="submitBtn">제출하기</button>
@@ -448,8 +496,11 @@
       <h1>관리자 모드</h1>
       <button type="button" class="admin-close" id="adminCloseBtn">✕</button>
     </div>
-    <p class="desc" style="text-align:left; margin-bottom:16px;">전화번호로 등록 건을 조회해서 잘못 입력된 정보를 수정할 수 있습니다.</p>
+    <p class="desc" style="text-align:left; margin-bottom:16px;">PIN을 입력하고 전화번호로 등록 건을 조회해서 잘못 입력된 정보를 수정할 수 있습니다.</p>
 
+    <div class="admin-search-row">
+      <input type="password" id="adminPin" inputmode="numeric" autocomplete="off" placeholder="관리자 PIN">
+    </div>
     <div class="admin-search-row">
       <input type="text" id="adminSearchPhone" placeholder="010-1234-5678" inputmode="numeric">
       <button type="button" id="adminSearchBtn">조회</button>
@@ -457,25 +508,25 @@
     <div class="admin-status hidden" id="adminStatus"></div>
 
     <form id="adminEditForm" class="hidden" novalidate>
-      <div class="field" id="admin-field-name">
+      <div class="field">
         <label for="adminName">이름</label>
         <input type="text" id="adminName">
       </div>
-      <div class="field" id="admin-field-phone">
+      <div class="field">
         <label for="adminPhone">전화번호</label>
         <input type="text" id="adminPhone" inputmode="numeric" placeholder="010-1234-5678">
       </div>
-      <div class="field" id="admin-field-gender">
+      <div class="field">
         <label>성별</label>
-        <div class="choice-group gender" data-field="adminGender">
+        <div class="choice-group gender" id="adminGenderGroup">
           <div class="choice-btn" data-value="여성">여성</div>
           <div class="choice-btn" data-value="남성">남성</div>
           <div class="choice-btn" data-value="선택 안함">선택 안함</div>
         </div>
       </div>
-      <div class="field" id="admin-field-age">
+      <div class="field">
         <label>연령대</label>
-        <div class="choice-group" data-field="adminAgeGroup">
+        <div class="choice-group" id="adminAgeGroup">
           <div class="choice-btn" data-value="10대">10대</div>
           <div class="choice-btn" data-value="20대">20대</div>
           <div class="choice-btn" data-value="30대">30대</div>
@@ -483,9 +534,18 @@
           <div class="choice-btn" data-value="50대+">50대+</div>
         </div>
       </div>
-      <div class="field" id="admin-field-instagram">
-        <label for="adminInstagram">인스타그램 아이디</label>
-        <input type="text" id="adminInstagram" placeholder="@theresoutdoor">
+      <div class="field">
+        <label>관심 브랜드 <span class="hint">(복수 선택 가능)</span></label>
+        <div class="choice-group" id="adminBrandGroup" data-multi="true">
+          <div class="choice-btn" data-value="CDC">CDC</div>
+          <div class="choice-btn" data-value="릿지">릿지</div>
+        </div>
+      </div>
+      <div class="field">
+        <label class="consent-row">
+          <input type="checkbox" id="adminMarketing">
+          <span class="consent-title">마케팅 수신 동의 (문자)</span>
+        </label>
       </div>
 
       <button type="submit" class="submit-btn" id="adminSaveBtn">수정 저장</button>
@@ -498,124 +558,127 @@
   // 서비스 워커 등록 (홈 화면 추가 시 주소창 없는 전체화면 실행을 위해 필요)
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => {
-        // 등록 실패해도 폼 기능 자체에는 영향 없음
-      });
+      navigator.serviceWorker.register('sw.js').catch(() => {});
     });
   }
 
-  // 이 패드가 어느 이벤트/부스에서 쓰이는지 표시할 값 (시트의 "수집소스" 컬럼에 기록됨)
+  // 시트의 "수집소스" 컬럼에 기록될 값 (행사/부스마다 바꿔서 사용)
   const SOURCE_LABEL = "키네틱웍스 부스";
-
+  // 시트의 "온라인/오프라인" 컬럼에 기록될 값
+  const VISIT_TYPE = "오프라인";
   // 배포한 Cloudflare Worker 주소
   const WORKER_URL = "https://kineticworks-info-collector.don-86a.workers.dev";
 
-  const form = document.getElementById('formCard');
-  const doneCard = document.getElementById('doneCard');
-  const duplicateCard = document.getElementById('duplicateCard');
-  const adminCard = document.getElementById('adminCard');
-  const submitBtn = document.getElementById('submitBtn');
+  const $ = (id) => document.getElementById(id);
 
-  const state = { gender: null, ageGroup: null };
-  const adminState = { gender: null, ageGroup: null, rowNumber: null };
+  const form = $('formCard');
+  const doneCard = $('doneCard');
+  const duplicateCard = $('duplicateCard');
+  const adminCard = $('adminCard');
+  const submitBtn = $('submitBtn');
 
   function showOnly(card) {
     [form, doneCard, duplicateCard, adminCard].forEach(c => c.classList.add('hidden'));
     card.classList.remove('hidden');
   }
 
-  // ---------- 선택형 버튼 (일반 폼: 성별 / 연령대) ----------
-  document.querySelectorAll('#formCard .choice-group').forEach(group => {
-    const fieldName = group.dataset.field;
+  function clearError(fieldEl) { fieldEl.classList.remove('invalid'); }
+  function setError(fieldEl) { fieldEl.classList.add('invalid'); }
+
+  // ---------- 선택 버튼 (성별/연령대: 하나만, 관심 브랜드: 여러 개) ----------
+  function selectedValues(group) {
+    return [...group.querySelectorAll('.choice-btn.selected')].map(b => b.dataset.value);
+  }
+
+  function setChoice(group, values) {
+    const wanted = new Set(values);
+    group.querySelectorAll('.choice-btn').forEach(b => {
+      b.classList.toggle('selected', wanted.has(b.dataset.value));
+    });
+  }
+
+  document.querySelectorAll('.choice-group').forEach(group => {
+    const multi = group.dataset.multi === 'true';
     group.querySelectorAll('.choice-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        group.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        state[fieldName] = btn.dataset.value;
-        clearError(group.closest('.field'));
+        if (multi) {
+          btn.classList.toggle('selected');
+        } else {
+          group.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+        }
+        const field = group.closest('.field');
+        if (field) clearError(field);
       });
     });
   });
 
-  document.getElementById('consent').addEventListener('change', function () {
-    if (this.checked) clearError(document.getElementById('field-consent'));
+  $('privacyConsent').addEventListener('change', function () {
+    if (this.checked) clearError($('field-privacy'));
   });
 
-  function clearError(fieldEl) { fieldEl.classList.remove('invalid'); }
-  function setError(fieldEl) { fieldEl.classList.add('invalid'); }
-
-  function isValidPhoneDigits(digits) {
-    return /^\d{8}$/.test(digits);
-  }
-
+  // ---------- 전화번호 ----------
   function buildPhone(restDigits) {
     return `010-${restDigits.slice(0, 4)}-${restDigits.slice(4, 8)}`;
   }
 
-  // 숫자만 입력되도록 제한
-  document.getElementById('phoneRest').addEventListener('input', function () {
-    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);
+  function digitsOnly(value) {
+    return String(value).replace(/[^0-9]/g, '');
+  }
+
+  function formatFullPhone(value) {
+    const d = digitsOnly(value);
+    if (d.length !== 11 || !d.startsWith('010')) return '';
+    return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
+  }
+
+  $('phoneRest').addEventListener('input', function () {
+    this.value = digitsOnly(this.value).slice(0, 8);
   });
 
+  // ---------- 제출 ----------
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
-    const nameEl = document.getElementById('name');
-    const phoneRestEl = document.getElementById('phoneRest');
-    const instagramEl = document.getElementById('instagramHandle');
-    const consentEl = document.getElementById('consent');
+    const name = $('name').value.trim();
+    const phoneDigits = $('phoneRest').value.trim();
+    const gender = selectedValues($('genderGroup'))[0] || '';
+    const ageGroup = selectedValues($('ageGroup'))[0] || '';
+    const brands = selectedValues($('brandGroup'));
+    const privacy = $('privacyConsent').checked;
+
+    const checks = [
+      ['field-name', !!name],
+      ['field-phone', /^\d{8}$/.test(phoneDigits)],
+      ['field-gender', !!gender],
+      ['field-age', !!ageGroup],
+      ['field-brand', brands.length > 0],
+      ['field-privacy', privacy]
+    ];
 
     let valid = true;
-
-    if (!nameEl.value.trim()) {
-      setError(document.getElementById('field-name'));
-      valid = false;
-    } else {
-      clearError(document.getElementById('field-name'));
+    checks.forEach(([id, ok]) => {
+      if (ok) clearError($(id)); else { setError($(id)); valid = false; }
+    });
+    if (!valid) {
+      const firstInvalid = document.querySelector('#formCard .field.invalid');
+      if (firstInvalid && firstInvalid.scrollIntoView) {
+        firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
     }
-
-    const phoneDigits = phoneRestEl.value.trim();
-    if (!isValidPhoneDigits(phoneDigits)) {
-      setError(document.getElementById('field-phone'));
-      valid = false;
-    } else {
-      clearError(document.getElementById('field-phone'));
-    }
-
-    if (!state.gender) {
-      setError(document.getElementById('field-gender'));
-      valid = false;
-    } else {
-      clearError(document.getElementById('field-gender'));
-    }
-
-    if (!state.ageGroup) {
-      setError(document.getElementById('field-age'));
-      valid = false;
-    } else {
-      clearError(document.getElementById('field-age'));
-    }
-
-    if (!consentEl.checked) {
-      setError(document.getElementById('field-consent'));
-      valid = false;
-    } else {
-      clearError(document.getElementById('field-consent'));
-    }
-
-    if (!valid) return;
-
-    const instagramHandle = instagramEl.value.trim().replace(/^@/, '');
 
     const payload = {
       action: 'submit',
-      name: nameEl.value.trim(),
+      name,
       phone: buildPhone(phoneDigits),
-      gender: state.gender,
-      ageGroup: state.ageGroup,
-      instagram: instagramHandle ? `@${instagramHandle}` : '',
-      consent: consentEl.checked,
-      source: SOURCE_LABEL
+      gender,
+      ageGroup,
+      brands,
+      marketing: $('marketingConsent').checked,
+      consent: privacy,
+      source: SOURCE_LABEL,
+      visitType: VISIT_TYPE
     };
 
     submitBtn.disabled = true;
@@ -633,8 +696,7 @@
       } else if (result && result.result === 'duplicate') {
         showOnly(duplicateCard);
       } else {
-        const msg = (result && result.message) ? result.message : '알 수 없는 오류';
-        alert('제출에 실패했습니다: ' + msg);
+        alert('제출에 실패했습니다: ' + ((result && result.message) || '알 수 없는 오류'));
       }
     })
     .catch(() => {
@@ -648,27 +710,18 @@
 
   function resetForm() {
     form.reset();
-    state.gender = null;
-    state.ageGroup = null;
-    document.querySelectorAll('#formCard .choice-btn').forEach(b => b.classList.remove('selected'));
-    document.querySelectorAll('#formCard .field').forEach(f => f.classList.remove('invalid'));
+    form.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+    form.querySelectorAll('.field').forEach(f => f.classList.remove('invalid'));
   }
 
-  document.getElementById('againBtn').addEventListener('click', () => {
-    resetForm();
-    showOnly(form);
-  });
-
-  document.getElementById('duplicateAgainBtn').addEventListener('click', () => {
-    resetForm();
-    showOnly(form);
-  });
+  $('againBtn').addEventListener('click', () => { resetForm(); showOnly(form); });
+  $('duplicateAgainBtn').addEventListener('click', () => { resetForm(); showOnly(form); });
 
   // ---------- 로고 4연속 클릭 → 관리자 모드 ----------
   let tapCount = 0;
   let tapTimer = null;
 
-  document.getElementById('logoImg').addEventListener('click', () => {
+  $('logoImg').addEventListener('click', () => {
     tapCount++;
     clearTimeout(tapTimer);
     tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
@@ -680,121 +733,131 @@
     }
   });
 
+  // ---------- 관리자 모드 ----------
+  const adminState = { pin: '', rowNumber: null, originalPhone: '' };
+
+  function showAdminStatus(message, isError) {
+    const el = $('adminStatus');
+    el.textContent = message;
+    el.classList.remove('hidden');
+    el.classList.toggle('notfound', !!isError);
+  }
+
   function openAdminMode() {
-    document.getElementById('adminSearchPhone').value = '';
-    document.getElementById('adminStatus').classList.add('hidden');
-    document.getElementById('adminEditForm').classList.add('hidden');
+    adminState.pin = '';
+    adminState.rowNumber = null;
+    adminState.originalPhone = '';
+    $('adminPin').value = '';
+    $('adminSearchPhone').value = '';
+    $('adminStatus').classList.add('hidden');
+    $('adminEditForm').classList.add('hidden');
     showOnly(adminCard);
   }
 
-  document.getElementById('adminCloseBtn').addEventListener('click', () => {
+  function closeAdminMode() {
+    adminState.pin = '';
+    $('adminPin').value = '';
+    $('adminEditForm').classList.add('hidden');
     showOnly(form);
-  });
-
-  // ---------- 관리자: 선택형 버튼 ----------
-  document.querySelectorAll('#adminEditForm .choice-group').forEach(group => {
-    const fieldName = group.dataset.field; // adminGender / adminAgeGroup
-    group.querySelectorAll('.choice-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        group.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        adminState[fieldName === 'adminGender' ? 'gender' : 'ageGroup'] = btn.dataset.value;
-      });
-    });
-  });
-
-  function selectAdminChoice(fieldName, value) {
-    const group = document.querySelector(`#adminEditForm .choice-group[data-field="${fieldName}"]`);
-    group.querySelectorAll('.choice-btn').forEach(b => {
-      b.classList.toggle('selected', b.dataset.value === value);
-    });
   }
 
-  // ---------- 관리자: 조회 ----------
-  document.getElementById('adminSearchBtn').addEventListener('click', () => {
-    const phoneInput = document.getElementById('adminSearchPhone').value.trim();
-    const digits = phoneInput.replace(/[^0-9]/g, '');
-    if (digits.length < 9) {
-      showAdminStatus('전화번호를 정확히 입력해주세요.', true);
-      return;
-    }
+  $('adminCloseBtn').addEventListener('click', closeAdminMode);
 
-    showAdminStatus('조회 중...', false);
-    document.getElementById('adminEditForm').classList.add('hidden');
-
-    fetch(WORKER_URL, {
+  async function callWorker(payload) {
+    const res = await fetch(WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'lookup', phone: phoneInput })
-    })
-    .then(async (res) => {
-      const result = await res.json().catch(() => null);
+      body: JSON.stringify(payload)
+    });
+    return res.json().catch(() => null);
+  }
+
+  $('adminSearchBtn').addEventListener('click', async () => {
+    const pin = $('adminPin').value.trim();
+    const phone = $('adminSearchPhone').value.trim();
+
+    if (!pin) { showAdminStatus('관리자 PIN을 입력해주세요.', true); return; }
+    if (digitsOnly(phone).length < 10) { showAdminStatus('전화번호를 정확히 입력해주세요.', true); return; }
+
+    showAdminStatus('조회 중...', false);
+    $('adminEditForm').classList.add('hidden');
+
+    try {
+      const result = await callWorker({ action: 'lookup', pin, phone });
+
       if (result && result.result === 'found') {
+        adminState.pin = pin;
         adminState.rowNumber = result.rowNumber;
-        adminState.gender = result.data.gender;
-        adminState.ageGroup = result.data.ageGroup;
+        adminState.originalPhone = result.data.phone;
 
-        document.getElementById('adminName').value = result.data.name || '';
-        document.getElementById('adminPhone').value = result.data.phone || '';
-        document.getElementById('adminInstagram').value = result.data.instagram || '';
-        selectAdminChoice('adminGender', result.data.gender);
-        selectAdminChoice('adminAgeGroup', result.data.ageGroup);
+        $('adminName').value = result.data.name || '';
+        $('adminPhone').value = result.data.phone || '';
+        setChoice($('adminGenderGroup'), [result.data.gender]);
+        setChoice($('adminAgeGroup'), [result.data.ageGroup]);
+        setChoice($('adminBrandGroup'), result.data.brands || []);
+        $('adminMarketing').checked = !!result.data.marketing;
 
-        document.getElementById('adminEditForm').classList.remove('hidden');
+        $('adminEditForm').classList.remove('hidden');
         showAdminStatus('등록된 정보를 찾았습니다. 아래에서 수정 후 저장하세요.', false);
       } else if (result && result.result === 'not_found') {
         showAdminStatus('등록된 정보가 없습니다.', true);
       } else {
         showAdminStatus((result && result.message) || '조회에 실패했습니다.', true);
       }
-    })
-    .catch(() => showAdminStatus('네트워크 오류가 발생했습니다.', true));
+    } catch (err) {
+      showAdminStatus('네트워크 오류가 발생했습니다.', true);
+    }
   });
 
-  function showAdminStatus(message, isError) {
-    const el = document.getElementById('adminStatus');
-    el.textContent = message;
-    el.classList.remove('hidden');
-    el.classList.toggle('notfound', !!isError);
-  }
-
-  // ---------- 관리자: 수정 저장 ----------
-  document.getElementById('adminEditForm').addEventListener('submit', function (e) {
+  $('adminEditForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const saveBtn = document.getElementById('adminSaveBtn');
-    const payload = {
-      action: 'update',
-      rowNumber: adminState.rowNumber,
-      name: document.getElementById('adminName').value.trim(),
-      phone: document.getElementById('adminPhone').value.trim(),
-      gender: adminState.gender,
-      ageGroup: adminState.ageGroup,
-      instagram: document.getElementById('adminInstagram').value.trim(),
-      source: SOURCE_LABEL
-    };
+    const name = $('adminName').value.trim();
+    const phone = formatFullPhone($('adminPhone').value);
+    const gender = selectedValues($('adminGenderGroup'))[0] || '';
+    const ageGroup = selectedValues($('adminAgeGroup'))[0] || '';
+    const brands = selectedValues($('adminBrandGroup'));
 
+    if (!name || !gender || !ageGroup || brands.length === 0) {
+      showAdminStatus('이름, 성별, 연령대, 관심 브랜드를 모두 입력해주세요.', true);
+      return;
+    }
+    if (!phone) {
+      showAdminStatus('전화번호는 010으로 시작하는 11자리로 입력해주세요.', true);
+      return;
+    }
+
+    const saveBtn = $('adminSaveBtn');
     saveBtn.disabled = true;
     saveBtn.textContent = '저장 중...';
 
-    fetch(WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    .then(async (res) => {
-      const result = await res.json().catch(() => null);
-      if (res.ok && result && result.result === 'success') {
+    try {
+      const result = await callWorker({
+        action: 'update',
+        pin: adminState.pin,
+        rowNumber: adminState.rowNumber,
+        originalPhone: adminState.originalPhone,
+        name,
+        phone,
+        gender,
+        ageGroup,
+        brands,
+        marketing: $('adminMarketing').checked
+      });
+
+      if (result && result.result === 'success') {
+        adminState.originalPhone = phone;
+        $('adminPhone').value = phone;
         showAdminStatus('수정 내용이 저장되었습니다.', false);
       } else {
         showAdminStatus((result && result.message) || '저장에 실패했습니다.', true);
       }
-    })
-    .catch(() => showAdminStatus('네트워크 오류가 발생했습니다.', true))
-    .finally(() => {
+    } catch (err) {
+      showAdminStatus('네트워크 오류가 발생했습니다.', true);
+    } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = '수정 저장';
-    });
+    }
   });
 </script>
 
